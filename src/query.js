@@ -98,7 +98,7 @@ function translate(query) {
 			if (pred === Object(pred))
 				q["$and"].push(traduire(field, pred));
 			if (val instanceof trapeze)
-				r.attr.push(field)
+				r.attr.push({[field]: pred})
 		}
 	}
 
@@ -106,8 +106,41 @@ function translate(query) {
 }
 
 // Gestion des possibilités et nécessités
-function deonto(res, r) {
+function possibilite(d, p) {
 	// Possibilité : sup_x{min{D(x),P(x)}}
+	const dx = 1e-5;
+
+	const tmin = Math.min(d._smin, p._smin), tmax = Math.max(d._smax, p._smax)
+
+	const min = isFinite(tmin) ? tmin : Math.max(d._smin, p._smin),
+	      max = isFinite(tmax) ? tmax : Math.min(d._smax, p._smax);
+
+	let inter = [];
+
+	for (let x = min; x < max; x += dx)
+		inter.push(Math.min(d(x), p(x)));
+
+	return inter.reduce(function (x, y) { return Math.max(x, y); })
+}
+
+function necessite(d, p) {
+	// Nécessité : inf_x(max{1-D(x),P(x)}}
+	const dx = 1e-5;
+
+	const tmin = Math.min(d._smin, p._smin), tmax = Math.max(d._smax, p._smax)
+
+	const min = isFinite(tmin) ? tmin : Math.max(d._smin, p._smin),
+	      max = isFinite(tmax) ? tmax : Math.min(d._smax, p._smax);
+
+	let inter = [];
+
+	for (let x = min; x < max; x += dx)
+		inter.push(Math.max(1 - d(x), p(x)));
+
+	return inter.reduce(function (x, y) { return Math.min(x, y); })
+}
+
+function deonto(res, r) {
 	// Nécessité : inf_x(max{1-D(x),P(x)}}
 	for (let field in r) {
 		// Traiter les attributs, il faut les requêtes originales
