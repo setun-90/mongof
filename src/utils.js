@@ -1,4 +1,4 @@
-//sauvegarde d'un alias vers la méthode d'origine  
+//sauvegarde d'un alias vers la méthode d'origine
 DBCollection.prototype.__insert__ = DBCollection.prototype.insert;
 DBCollection.prototype.__insertMany__ = DBCollection.prototype.insertMany;
 
@@ -8,16 +8,18 @@ function predicat(p){
     this.domain = p.domain;
 }
 
-function trapeze(b00, b01, b10, b11) {
-	this.b00 = b00;
-	this.b01 = b01;
-	this.b10 = b10;
-	this.b11 = b11;
+// Définition de valeur floue
+function trapeze(smin, nmin, nmax, smax) {
+	this._smin = smin;
+	this._nmin = nmin;
+	this._nmax = nmax;
+	this._smax = smax;
 }
 
-function interval(b0, b1) {
-	this.b0 = b0;
-	this.b1 = b1;
+function interval(min, max) {
+	this._smin = this._nmin = min;
+	this._smax = this._nmax = max;
 }
+interval.prototype = trapeze.prototype;
 
 print("utils script loaded");
