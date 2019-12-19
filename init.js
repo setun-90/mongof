@@ -1,4 +1,4 @@
-var loadPredicates = function(db){
+var loadPredicats = function(db){
     //db.trapeze.insert( { name: "Jeune", value : new trapeze(18,20,30,35), domain : { property : [ "Age" ], collection: [ ] }});
     cursor = db.trapeze.find();
     print("Creating Variables");
