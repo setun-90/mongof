@@ -1,5 +1,7 @@
 'use strict';
 
+load("src/utils.js");
+
 // Fonction de traduction
 function translate(query) {
 	function traduire(field, pred) {
@@ -9,19 +11,19 @@ function translate(query) {
 		et prédicats flous
 		*/
 
-		let s, op = Object.keys(pred)[0];
+		let s, op = Object.keys(pred)[0], val = pred[op] instanceof predicat ? pred[op].value : pred[op];
 		switch (op) {
 			case "$flt": {
 				s = {$or: [
-					{[field]: {$lt: pred[op]._smin}},
-					{[field + "._smax"]: {$lt: pred[op]._smin}}
+					{[field]: {$lt: val._smin}},
+					{[field + "._smax"]: {$lt: val._smin}}
 				]};
 				break;
 			}
 			case "$fgt": {
 				s = {$or: [
-					{[field]: {$gt: pred[op]._smax}},
-					{[field + "._smin"]: {$gt: pred[op]._smax}}
+					{[field]: {$gt: val._smax}},
+					{[field + "._smin"]: {$gt: val._smax}}
 				]};
 				break;
 			}
@@ -33,24 +35,24 @@ function translate(query) {
 			}
 			case "$feq": {
 				s = {$or: [
-					{[field]: {$gt: pred[op]._smin, $lt: pred[op]._smax}},
+					{[field]: {$gt: val._smin, $lt: val._smax}},
 					{$and: [
-						{[field + "._smin"]: {$gt: pred[op]._smin}},
-						{[field + "._smax"]: {$lt: pred[op]._smax}}
+						{[field + "._smin"]: {$gt: val._smin}},
+						{[field + "._smax"]: {$lt: val._smax}}
 					]},
 					{$and: [
-						{[field + "._smin"]: {$lt: pred[op]._smin}},
-						{[field + "._smax"]: {$gt: pred[op]._smax}}
+						{[field + "._smin"]: {$lt: val._smin}},
+						{[field + "._smax"]: {$gt: val._smax}}
 					]}
 				]};
 				break;
 			}
 			case "$fne": {
 				s = {$or: [
-					{[field]: {$lt: pred[op]._smin}},
-					{[field]: {$gt: pred[op]._smax}},
-					{[field + "._smax"]: {$lt: pred[op]._smin}},
-					{[field + "._smin"]: {$gt: pred[op]._smax}}
+					{[field]: {$lt: val._smin}},
+					{[field]: {$gt: val._smax}},
+					{[field + "._smax"]: {$lt: val._smin}},
+					{[field + "._smin"]: {$gt: val._smax}}
 				]};
 				break;
 			}
@@ -107,7 +109,9 @@ function translate(query) {
 function deonto(res, r) {
 	// Possibilité : sup_x{min{D(x),P(x)}}
 	// Nécessité : inf_x(max{1-D(x),P(x)}}
-
+	for (let field in r) {
+		// Traiter les attributs, il faut les requêtes originales
+	}
 
 	return res;
 }
