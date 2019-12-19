@@ -61,7 +61,7 @@ function translate(query) {
 		return s;
 	}
 
-	let q = {}, r = {};
+	let q = {}, r = { attr: []};
 	if (!("$and" in query
 	   || "$or" in query
 	   || "$nor" in query
@@ -92,9 +92,11 @@ function translate(query) {
 		}
 		// Cas de base
 		default: {
-			let pred = query[field];
+			let pred = query[field], val = pred[Object.keys(pred)[0]];
 			if (pred === Object(pred))
 				q["$and"].push(traduire(field, pred));
+			if (val instanceof trapeze)
+				r.attr.push(field)
 		}
 	}
 
@@ -103,6 +105,10 @@ function translate(query) {
 
 // Gestion des possibilités et nécessités
 function deonto(res, r) {
+	// Possibilité : sup_x{min{D(x),P(x)}}
+	// Nécessité : inf_x(max{1-D(x),P(x)}}
+
+
 	return res;
 }
 
