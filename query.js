@@ -8,21 +8,21 @@ function translate(query) {
 		sur les propriétés des représentations des valeurs
 		et prédicats flous
 		*/
-		let s = [];
-		for (let op in pred)
-			switch (op) {
+
+		let s, op = Object.keys(pred)[0];
+		switch (op) {
 			case "$flt": {
-				s.push({$or: [
+				s = {$or: [
 					{[field]: {$lt: pred[op]._smin}},
 					{[field + "._smax"]: {$lt: pred[op]._smin}}
-				]});
+				]};
 				break;
 			}
 			case "$fgt": {
-				s.push({$or: [
+				s = {$or: [
 					{[field]: {$gt: pred[op]._smax}},
 					{[field + "._smin"]: {$gt: pred[op]._smax}}
-				]});
+				]};
 				break;
 			}
 			case "$flte": {
@@ -32,7 +32,7 @@ function translate(query) {
 				break;
 			}
 			case "$feq": {
-				s.push({$or: [
+				s = {$or: [
 					{[field]: {$gt: pred[op]._smin, $lt: pred[op]._smax}},
 					{$and: [
 						{[field + "._smin"]: {$gt: pred[op]._smin}},
@@ -42,47 +42,59 @@ function translate(query) {
 						{[field + "._smin"]: {$lt: pred[op]._smin}},
 						{[field + "._smax"]: {$gt: pred[op]._smax}}
 					]}
-				]});
+				]};
 				break;
 			}
 			case "$fne": {
-				s.push({$or: [
+				s = {$or: [
 					{[field]: {$lt: pred[op]._smin}},
 					{[field]: {$gt: pred[op]._smax}},
 					{[field + "._smax"]: {$lt: pred[op]._smin}},
 					{[field + "._smin"]: {$gt: pred[op]._smax}}
-				]});
+				]};
 				break;
 			}
 			default:
-				s.push(pred[op]);
+				s = {[field]: pred};
 				break;
 		}
-		if (s.length > 1)
-			return {$and: s};
-		return s[0];
+		return s;
 	}
 
 	let q = {}, r = {};
+	if (!("$and" in query
+	   || "$or" in query
+	   || "$nor" in query
+	   || "$not" in query
+	))
+		q["$and"] = [];
+
 	for (let field in query)
 		switch (field) {
 		// Cas récursifs
 		case "$and":
 		case "$or":
 		case "$not":
-		case "$nor":
-			for (let pred in field)
-				q[field].push(translate(pred));
+		case "$nor": {
+			q[field] = [];
+			for (let pred in query[field]) {
+				let t = translate(query[field][pred]).q;
+				if (t)
+					q[field].push(t);
+			}
 			break;
+		}
 		case "fuzzy.possibilite":
-		case "fuzzy.necessite":
+		case "fuzzy.necessite": {
 			r[field] = query[field];
+			delete q["$and"];
 			break;
+		}
 		// Cas de base
 		default: {
 			let pred = query[field];
 			if (pred === Object(pred))
-				q = traduire(field, pred);
+				q["$and"].push(traduire(field, pred));
 		}
 	}
 
