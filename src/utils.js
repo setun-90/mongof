@@ -19,3 +19,5 @@ function interval(b0, b1) {
 	this.b0 = b0;
 	this.b1 = b1;
 }
+
+print("utils script loaded");

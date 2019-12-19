@@ -10,3 +10,5 @@ var loadPredicats = function(db){
         this[name] = c;
     }
 };
+
+print("init script loaded");

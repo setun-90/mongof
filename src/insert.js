@@ -1,6 +1,5 @@
 //overwrite insert method to validate 
 DBCollection.prototype.insert = function(document,options={}){
-	print("new insert");
 	var valid = true;
 	var msg = "";
 	Object.keys(document).forEach(key => {
@@ -8,9 +7,9 @@ DBCollection.prototype.insert = function(document,options={}){
 		if(predicat.prototype.isPrototypeOf(value)){
 			msg = value.name + " can be applied to : " + JSON.stringify(value.domain);
 			let property = value.domain.property;
-			print(property);
+			//print(property);
 			let collection = value.domain.collection;
-			print(collection);
+			//print(collection);
 			if(property.length> 0){
 				valid = valid && property.includes(key);
 			}
@@ -29,9 +28,9 @@ DBCollection.prototype.insert = function(document,options={}){
 }
 
 DBCollection.prototype.insertMany = function(documents,options={}){
-	print("new insertMany");
 	documents.forEach(element =>{
 		this.insert(element,options);
 	});
 }
 
+print("insert script loaded");
