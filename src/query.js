@@ -1,6 +1,6 @@
 'use strict';
 
-load("src/utils.js");
+load("utils.js");
 
 // Fonction de traduction
 function translate(query) {
@@ -105,6 +105,14 @@ function translate(query) {
 	return {"q": q, "r": r};
 }
 
+// Appartenances
+function appartenance(p, x) {
+		return p._nmin <= x && x <= p._nmax ? 1
+		     : p._smin <  x && x <  p._nmin ? (x - p._smin)/(p._nmin - p._smin)
+		     : p._nmax <  x && x <  p._smax ? (p._smax - x)/(p._smax - p._nmax)
+		     : 0;
+}
+
 // Gestion des possibilités et nécessités
 function possibilite(d, p) {
 	// Possibilité : sup_x{min{D(x),P(x)}}
@@ -118,7 +126,7 @@ function possibilite(d, p) {
 	let inter = [];
 
 	for (let x = min; x < max; x += dx)
-		inter.push(Math.min(d(x), p(x)));
+		inter.push(Math.min(appartenance(d, x), appartenance(p, x)));
 
 	return inter.reduce(function (x, y) { return Math.max(x, y); });
 }
@@ -135,13 +143,12 @@ function necessite(d, p) {
 	let inter = [];
 
 	for (let x = min; x < max; x += dx)
-		inter.push(Math.max(1 - d(x), p(x)));
+		inter.push(Math.max(1 - appartenance(d, x), appartenance(p, x)));
 
 	return inter.reduce(function (x, y) { return Math.min(x, y); })
 }
 
 function deonto(res, r) {
-	// Nécessité : inf_x(max{1-D(x),P(x)}}
 	for (let field in r) {
 		// Traiter les attributs, il faut les requêtes originales
 	}

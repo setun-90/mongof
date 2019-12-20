@@ -10,29 +10,16 @@ function predicat(p){
 
 // Définition de valeur floue
 function trapeze(smin, nmin, nmax, smax) {
-	function f(x) {
-		return nmin <= x && x <= nmax ? 1 :
-		       smin <  x && x <  nmin ? (x - smin)/(nmin - smin) :
-		       nmax <  x && x <  smax ? (smax - x)/(smax - nmax) :
-		       0;
-	}
-	f._smin = smin;
-	f._nmin = nmin;
-	f._nmax = nmax;
-	f._smax = smax;
-	Object.setPrototypeOf(f, trapeze.prototype);
-	return f;
+	this._smin = smin;
+	this._nmin = nmin;
+	this._nmax = nmax;
+	this._smax = smax;
 }
 
 function interval(min, max) {
-	function f(x) {
-		return min <= x && x <= max ? 1 : 0;
-	}
-	f._smin = f._nmin = min;
-	f._smax = f._nmax = max;
-	Object.setPrototypeOf(f, interval.prototype);
-	return f;
+	this._smin = this._nmin = min;
+	this._smax = this._nmax = max;
 }
-interval.prototype = trapeze.prototype = Function.prototype;
+interval.prototype = trapeze.prototype;
 
 print("utils script loaded");
