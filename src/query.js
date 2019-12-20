@@ -98,7 +98,7 @@ function translate(query) {
 			if (pred === Object(pred))
 				q["$and"].push(traduire(field, pred));
 			if (val instanceof trapeze)
-				r.attr.push({[field]: pred})
+				r.attr.push({[field]: pred});
 		}
 	}
 
@@ -120,7 +120,7 @@ function possibilite(d, p) {
 	for (let x = min; x < max; x += dx)
 		inter.push(Math.min(d(x), p(x)));
 
-	return inter.reduce(function (x, y) { return Math.max(x, y); })
+	return inter.reduce(function (x, y) { return Math.max(x, y); });
 }
 
 function necessite(d, p) {
