@@ -89,7 +89,6 @@ function translate(query) {
 		case "fuzzy.possibilite":
 		case "fuzzy.necessite": {
 			r[field] = query[field];
-			delete q["$and"];
 			break;
 		}
 		// Cas de base
