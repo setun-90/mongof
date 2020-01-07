@@ -123,12 +123,12 @@ function possibilite(d, p) {
 	const min = isFinite(tmin) ? tmin : Math.max(d._smin, p._smin),
 	      max = isFinite(tmax) ? tmax : Math.min(d._smax, p._smax);
 
-	let inter = [];
+	let inter = 0;
 
 	for (let x = min; x < max; x += dx)
-		inter.push(Math.min(appartenance(d, x), appartenance(p, x)));
+		inter = Math.max(inter, Math.min(appartenance(d, x), appartenance(p, x)));
 
-	return inter.reduce(function (x, y) { return Math.max(x, y); });
+	return inter;
 }
 
 function necessite(d, p) {
@@ -140,12 +140,12 @@ function necessite(d, p) {
 	const min = isFinite(tmin) ? tmin : Math.max(d._smin, p._smin),
 	      max = isFinite(tmax) ? tmax : Math.min(d._smax, p._smax);
 
-	let inter = [];
+	let inter = 1;
 
 	for (let x = min; x < max; x += dx)
-		inter.push(Math.max(1 - appartenance(d, x), appartenance(p, x)));
+		inter = Math.min(inter, Math.max(1 - appartenance(d, x), appartenance(p, x)));
 
-	return inter.reduce(function (x, y) { return Math.min(x, y); })
+	return inter;
 }
 
 function deonto(res, r) {
