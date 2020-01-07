@@ -1,7 +1,5 @@
 'use strict';
 
-load("utils.js");
-
 // Fonction de traduction
 function translate(query) {
 	function traduire(field, pred) {
@@ -169,3 +167,5 @@ DBCollection.find = function(query, fields, limit, skip, batchSize, options) {
 	return res;
 }
 */
+
+print("query script loaded");

@@ -1,3 +1,7 @@
+'use strict';
+
+load("../src/init_load.js");
+
 //ajout des prédicats
 db.trapeze.insert( { name: "Jeune", value : new trapeze(18,20,30,35), domain : { property : [ "Age" ], collection: [ ] }});
 db.trapeze.insert( { name: "Mûr", value : new trapeze(35,40,50,70), domain : { property : [ "Age" ], collection: [ ] }});
