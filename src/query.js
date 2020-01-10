@@ -1,5 +1,9 @@
 'use strict';
 
+function fuzzy_value(v) {
+	return v instanceof predicat ? v.value : v instanceof trapeze ? v : undefined;
+}
+
 // Fonction de traduction
 function translate(query) {
 	function traduire(field, pred) {
@@ -9,65 +13,69 @@ function translate(query) {
 		et prédicats flous
 		*/
 
-		let s, op = Object.keys(pred)[0], val = pred[op] instanceof predicat ? pred[op].value : pred[op];
-		switch (op) {
-			case "$flt": {
-				s = {$or: [
-					{[field]: {$lt: val._smin}},
-					{[field + "._smax"]: {$lt: val._smin}}
-				]};
-				break;
+		let s, p, n, op = Object.keys(pred)[0];
+		if (!fuzzy_value(pred)) {
+			let val = fuzzy_value(pred[op]);
+			switch (op) {
+				case "$flt": {
+					s = {$or: [
+						{[field]: {$lt: val._smin}},
+						{[field + "._smax"]: {$lt: val._smin}}
+					]};
+					break;
+				}
+				case "$fgt": {
+					s = {$or: [
+						{[field]: {$gt: val._smax}},
+						{[field + "._smin"]: {$gt: val._smax}}
+					]};
+					break;
+				}
+				case "$flte": {
+					break;
+				}
+				case "$fgte": {
+					break;
+				}
+				case "$feq": {
+					s = {$or: [
+						{[field]: {$gt: val._smin, $lt: val._smax}},
+						{$and: [
+							{[field + "._smin"]: {$gt: val._smin}},
+							{[field + "._smax"]: {$lt: val._smax}}
+						]},
+						{$and: [
+							{[field + "._smin"]: {$lt: val._smin}},
+							{[field + "._smax"]: {$gt: val._smax}}
+						]}
+					]};
+					break;
+				}
+				case "$fne": {
+					s = {$or: [
+						{[field]: {$lt: val._smin}},
+						{[field]: {$gt: val._smax}},
+						{[field + "._smax"]: {$lt: val._smin}},
+						{[field + "._smin"]: {$gt: val._smax}}
+					]};
+					break;
+				}
 			}
-			case "$fgt": {
-				s = {$or: [
-					{[field]: {$gt: val._smax}},
-					{[field + "._smin"]: {$gt: val._smax}}
-				]};
-				break;
-			}
-			case "$flte": {
-				break;
-			}
-			case "$fgte": {
-				break;
-			}
-			case "$feq": {
-				s = {$or: [
-					{[field]: {$gt: val._smin, $lt: val._smax}},
-					{$and: [
-						{[field + "._smin"]: {$gt: val._smin}},
-						{[field + "._smax"]: {$lt: val._smax}}
-					]},
-					{$and: [
-						{[field + "._smin"]: {$lt: val._smin}},
-						{[field + "._smax"]: {$gt: val._smax}}
-					]}
-				]};
-				break;
-			}
-			case "$fne": {
-				s = {$or: [
-					{[field]: {$lt: val._smin}},
-					{[field]: {$gt: val._smax}},
-					{[field + "._smax"]: {$lt: val._smin}},
-					{[field + "._smin"]: {$gt: val._smax}}
-				]};
-				break;
-			}
-			default:
-				s = {[field]: pred};
-				break;
+		} else {
+			let val = fuzzy_value(pred);
+			s = {[field]: pred};
+			printjson(val);
+			p = function (c) {
+				return c[field] instanceof trapeze ? possibilite(c[field], val) : appartenance(val, c[field]);
+			};
+			n = function (c) {
+				return c[field] instanceof trapeze ? necessite(c[field], val) : appartenance(val, c[field]);
+			};
 		}
-		return s;
+		return { "s": s, "f": { "p": p, "n": n } };
 	}
 
-	let q = {}, r = { attr: []};
-	if (!("$and" in query
-	   || "$or" in query
-	   || "$nor" in query
-	   || "$not" in query
-	))
-		q["$and"] = [];
+	let q = {}, r = { a: {}, f : []};
 
 	for (let field in query)
 		switch (field) {
@@ -78,9 +86,9 @@ function translate(query) {
 		case "$nor": {
 			q[field] = [];
 			for (let pred in query[field]) {
-				let t = translate(query[field][pred]).q;
-				if (t)
-					q[field].push(t);
+				var t = translate(query[field][pred]);
+				q[field].push(t.q);
+				r.a = t.r.a;
 			}
 			break;
 		}
@@ -91,14 +99,69 @@ function translate(query) {
 		}
 		// Cas de base
 		default: {
-			let pred = query[field], val = pred[Object.keys(pred)[0]];
-			if (pred === Object(pred))
-				q["$and"].push(traduire(field, pred));
-			if (val instanceof trapeze)
-				r.attr.push({[field]: pred});
+			let pred = query[field], val = pred[Object.keys(pred)[0]], t, p;
+			if (pred === Object(pred)) {
+				t = traduire(field, pred);
+				p = Object.keys(t.s)[0];
+				q[p] = t.s[p];
+			}
+			if (fuzzy_value(val) || fuzzy_value(pred)) {
+				r.a[field] = 1;
+				r.f.push(t.f);
+			}
 		}
 	}
 
+	for (let field in query)
+		switch (field) {
+		// Cas récursifs
+		case "$and": {
+			r.f.push({
+				"p": function (c) {
+					let a = [];
+					for (let n = 0; n < t.r.f.length; n++)
+						a.push(t.r.f[n].p(c));
+					return Math.min(...a);
+				},
+				"n": function (c) {
+					let a = [];
+					for (let n = 0; n < t.r.f.length; n++)
+						a.push(t.r.f[n].n(c));
+					return Math.min(...a);
+				},
+			});
+			break;
+		}
+		case "$or": {
+			r.f.push({
+				"p": function (c) {
+					let a = [];
+					for (let n = 0; n < t.r.f.length; n++)
+						a.push(t.r.f[n].p(c));
+					return Math.max(...a);
+				},
+				"n": function (c) {
+					let a = [];
+					for (let n = 0; n < t.r.f.length; n++)
+						a.push(t.r.f[n].n(c));
+					return Math.max(...a);
+				}
+			});
+			break;
+		}
+		case "$not": {
+			let f = function (c) {
+				let a = [];
+				for (let n = 0; n < t.r.f.length; n++)
+					a.push(t.f[n].p(c));
+				return d.map(function (x) {
+					return 1 - x;
+				});
+			};
+			r.f.push({"p": f, "n" : f});
+			break;
+		}
+	}
 	return {"q": q, "r": r};
 }
 
@@ -112,7 +175,7 @@ function appartenance(p, x) {
 
 // Gestion des possibilités et nécessités
 function possibilite(d, p) {
-	// Possibilité : sup_x{min{D(x),P(x)}}
+	// Possibilité : sup_x{min(D(x),P(x))}
 	const dx = 1e-5;
 
 	const tmin = Math.min(d._smin, p._smin), tmax = Math.max(d._smax, p._smax)
@@ -129,7 +192,7 @@ function possibilite(d, p) {
 }
 
 function necessite(d, p) {
-	// Nécessité : inf_x(max{1-D(x),P(x)}}
+	// Nécessité : inf_x{max(1-D(x),P(x))}
 	const dx = 1e-5;
 
 	const tmin = Math.min(d._smin, p._smin), tmax = Math.max(d._smax, p._smax)
@@ -145,12 +208,25 @@ function necessite(d, p) {
 	return inter;
 }
 
-function deonto(res, r) {
-	for (let field in r) {
-		// Traiter les attributs, il faut les requêtes originales
-	}
+function deonto(c, r) {
+	if (r.f.length === 0)
+		return c;
 
-	return res;
+	const kr = "fuzzy.possibilite" in r ? "fuzzy.possibilite"
+	         : "fuzzy.necessite" in r ? "fuzzy.necessite"
+	         : undefined,
+	      kf = kr === "fuzzy.possibilite" ? "p"
+	         : kr === "fuzzy.necessite" ? "n"
+	         : "p",
+	      s = kr ? r[kr] : 0;
+
+	let ca = c.toArray();
+
+	let cb = ca.filter(function (ic) {
+		return r.f[0][kf](ic) >= s;
+	});
+
+	return cb;
 }
 
 // Ajout de métainformations
@@ -158,14 +234,27 @@ function metainfo(res) {
 	return res;
 }
 
-/*
-DBCollection._find = DBCollection.find;
-DBCollection.find = function(query, fields, limit, skip, batchSize, options) {
-	let a = translate(query);
-	let res = deonto(this._find(a.q, fields, limit, skip, batchSize, options), a.r);
+// Patch de la méthode
+if (DBCollection.prototype._find == null) {
+	DBCollection.prototype._find = DBCollection.prototype.find;
+	DBCollection.prototype.find = function(query, fields, limit, skip, batchSize, options) {
+		let a = translate(query);
+		if (fields) {
+			var f = fields;
+			for (let value in a.r.a)
+				f[value] = 1;
+		} else {
+			var f = {};
+			for (let value in query)
+				f[value] = 1;
+		}
+		let res = deonto(this._find(a.q, f, limit, skip, batchSize, options), a.r);
 
-	return res;
+		print(res);
+
+		return res;
+	}
 }
-*/
+
 
 print("query script loaded");
