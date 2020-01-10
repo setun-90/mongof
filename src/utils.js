@@ -1,7 +1,4 @@
-//sauvegarde d'un alias vers la méthode d'origine
-DBCollection.prototype.__insert__ = DBCollection.prototype.insert;
-DBCollection.prototype.__insertMany__ = DBCollection.prototype.insertMany;
-
+// Définition des prédicats
 function predicat(p){
     this.name = p.name;
     this.value = p.value;
