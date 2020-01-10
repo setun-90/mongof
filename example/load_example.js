@@ -3,13 +3,13 @@
 load("../src/init_load.js");
 
 //ajout des prédicats
-db.trapeze.insert( { name: "Jeune", value : new trapeze(18,20,30,35), domain : { property : [ "Age" ], collection: [ ] }});
-db.trapeze.insert( { name: "Mûr", value : new trapeze(35,40,50,70), domain : { property : [ "Age" ], collection: [ ] }});
-db.trapeze.insert( { name: "Vieux", value : new trapeze(70,75,Infinity,Infinity), domain : { property : [ "Age" ], collection: [ ] }});
-db.trapeze.insert( { name: "Elevé", value : new trapeze(110,130,Infinity,Infinity), domain : { property : [ "Salaire" ], collection: ["Cadres"] }});
-db.trapeze.insert( { name: "Faible", value : new trapeze(85,95,110,130), domain : { property : [ "Salaire" ], collection: ["Cadres"] }});
-db.trapeze.insert( { name: "VariableFort", value : new trapeze(70,80,90,140), domain : { property : [ "Salaire" ], collection: ["Cadres"] }});
-db.trapeze.insert( { name: "MoyenSup", value : new interval(100,130), domain : { property : [ "Salaire" ], collection: ["Cadres"] }});
+db.trapeze.insert(new predicat({ name: "Jeune", value : new trapeze(18,20,30,35), domain : { property : [ "Age" ], collection: [ ] }}));
+db.trapeze.insert(new predicat({ name: "Mûr", value : new trapeze(35,40,50,70), domain : { property : [ "Age" ], collection: [ ] }}));
+db.trapeze.insert(new predicat({ name: "Vieux", value : new trapeze(70,75,Infinity,Infinity), domain : { property : [ "Age" ], collection: [ ] }}));
+db.trapeze.insert(new predicat({ name: "Elevé", value : new trapeze(110,130,Infinity,Infinity), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
+db.trapeze.insert(new predicat({ name: "Faible", value : new trapeze(85,95,110,130), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
+db.trapeze.insert(new predicat({ name: "VariableFort", value : new trapeze(70,80,90,140), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
+db.trapeze.insert(new predicat({ name: "MoyenSup", value : new interval(100,130), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
 //creation des variables du shell
 loadPredicats(db);
 //ajout des documents 
