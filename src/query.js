@@ -225,15 +225,16 @@ function deonto(c, r) {
 	let ca = c.toArray();
 
 	let cb = ca.filter(function (ic) {
-		return r.f[0][kf](ic) >= s;
+		return r.f[0][kf](ic) > s;
+	});
+	cb.forEach(function (ic) {
+		ic.fuzzy = {
+			possibilite: r.f[0].p(ic),
+			necessite: r.f[0].n(ic)
+		}
 	});
 
 	return cb;
-}
-
-// Ajout de métainformations
-function metainfo(res) {
-	return res;
 }
 
 // Patch de la méthode
