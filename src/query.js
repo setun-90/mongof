@@ -104,7 +104,6 @@ function translate(query) {
 			if (pred === Object(pred)) {
 				t = traduire(field, pred);
 				p = Object.keys(t.s)[0];
-				q[p] = t.s[p];
 			} else {
 				q[field] = pred;
 			}
