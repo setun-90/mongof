@@ -245,8 +245,8 @@ if (DBCollection.prototype._find == null) {
 				f[value] = 1;
 		} else {
 			var f = {};
-			for (let value in query)
-				f[value] = 1;
+//			for (let value in query)
+//				f[value] = 1;
 		}
 		let res = deonto(this._find(a.q, f, limit, skip, batchSize, options), a.r);
 
