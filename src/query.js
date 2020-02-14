@@ -1,7 +1,7 @@
 'use strict';
 
 function fuzzy_value(v) {
-	return v instanceof predicat ? v.value : v instanceof trapeze ? v : undefined;
+	return v === Object(v) && "value" in v ? v.value : v instanceof trapeze ? v : undefined;
 }
 
 // Fonction de traduction
