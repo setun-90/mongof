@@ -104,6 +104,8 @@ function translate(query) {
 				t = traduire(field, pred);
 				p = Object.keys(t.s)[0];
 				q[p] = t.s[p];
+			} else {
+				q[field] = pred;
 			}
 			if (fuzzy_value(val) || fuzzy_value(pred)) {
 				r.a[field] = 1;
