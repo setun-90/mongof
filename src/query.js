@@ -64,12 +64,13 @@ function translate(query) {
 		} else {
 			let val = fuzzy_value(pred);
 			s = {[field]: pred};
-			printjson(val);
 			p = function (c) {
-				return c[field] instanceof trapeze ? possibilite(c[field], val) : appartenance(val, c[field]);
+				const data = fuzzy_value(c[field]);
+				return data ? possibilite(data, val) : appartenance(val, c[field]);
 			};
 			n = function (c) {
-				return c[field] instanceof trapeze ? necessite(c[field], val) : appartenance(val, c[field]);
+				const data = fuzzy_value(c[field]);
+				return data ? necessite(data, val) : appartenance(val, c[field]);
 			};
 		}
 		return { "s": s, "f": { "p": p, "n": n } };
