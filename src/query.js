@@ -13,9 +13,9 @@ function translate(query) {
 		et prédicats flous
 		*/
 
-		let s, p, n, op = Object.keys(pred)[0];
-		if (!fuzzy_value(pred)) {
-			let val = fuzzy_value(pred[op]);
+		let s, p, n, op = Object.keys(pred)[0], val = fuzzy_value(pred);
+		if (!val) {
+			val = fuzzy_value(pred[op]);
 			switch (op) {
 				case "$flt": {
 					s = {$or: [
@@ -62,7 +62,6 @@ function translate(query) {
 				}
 			}
 		} else {
-			let val = fuzzy_value(pred);
 			s = {[field]: pred};
 			p = function (c) {
 				const data = fuzzy_value(c[field]);
