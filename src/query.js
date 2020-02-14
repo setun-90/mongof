@@ -250,8 +250,6 @@ if (DBCollection.prototype._find == null) {
 		}
 		let res = deonto(this._find(a.q, f, limit, skip, batchSize, options), a.r);
 
-		print(res);
-
 		return res;
 	}
 }
