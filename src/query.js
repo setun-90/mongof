@@ -5,7 +5,7 @@ function fuzzy_value(v) {
 }
 
 // Fonction de traduction
-function translate(query) {
+function translate(query,dbname) {
 	function traduire(field, pred) {
 		/*
 		Une requête floue est traduite en le décomposant
@@ -63,6 +63,20 @@ function translate(query) {
 			}
 		} else {
 			s = {[field]: pred};
+			var valid = true;
+			let property = pred.domain.property;
+			//print(property);
+			let collection = pred.domain.collection;
+			//print(collection);
+			if(property.length> 0){
+				valid = valid && property.includes(field);
+			}
+			if(collection.length > 0){
+				valid = valid && collection.includes(dbname);
+			}
+			if (!valid) {
+				throw "Requête invalide : application du prédicat non valide";
+			}
 			p = function (c) {
 				const data = fuzzy_value(c[field]);
 				return data ? possibilite(data, val) : appartenance(val, c[field]);
@@ -86,7 +100,7 @@ function translate(query) {
 		case "$nor": {
 			q[field] = [];
 			for (let pred in query[field]) {
-				var t = translate(query[field][pred]);
+				var t = translate(query[field][pred],dbname);
 				q[field].push(t.q);
 				r.a = t.r.a;
 			}
@@ -240,7 +254,7 @@ function deonto(c, r) {
 if (DBCollection.prototype._find == null) {
 	DBCollection.prototype._find = DBCollection.prototype.find;
 	DBCollection.prototype.find = function(query, fields, limit, skip, batchSize, options) {
-		let a = translate(query);
+		let a = translate(query,this.getName());
 		if (fields) {
 			var f = fields;
 			for (let value in a.r.a)
