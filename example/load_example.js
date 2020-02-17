@@ -1,20 +1,19 @@
 'use strict';
-
 load("../src/init_load.js");
 
 //ajout des prédicats
 db.trapeze.insert(new predicat({ name: "Jeune", value : new trapeze(18,20,30,35), domain : { property : [ "Age" ], collection: [ ] }}));
-db.trapeze.insert(new predicat({ name: "Mûr", value : new trapeze(35,40,50,70), domain : { property : [ "Age" ], collection: [ ] }}));
+db.trapeze.insert(new predicat({ name: "Mur", value : new trapeze(35,40,50,70), domain : { property : [ "Age" ], collection: [ ] }}));
 db.trapeze.insert(new predicat({ name: "Vieux", value : new trapeze(70,75,Infinity,Infinity), domain : { property : [ "Age" ], collection: [ ] }}));
-db.trapeze.insert(new predicat({ name: "Elevé", value : new trapeze(110,130,Infinity,Infinity), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
+db.trapeze.insert(new predicat({ name: "Eleve", value : new trapeze(110,130,Infinity,Infinity), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
 db.trapeze.insert(new predicat({ name: "Faible", value : new trapeze(85,95,110,130), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
 db.trapeze.insert(new predicat({ name: "VariableFort", value : new trapeze(70,80,90,140), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
 db.trapeze.insert(new predicat({ name: "MoyenSup", value : new interval(100,130), domain : { property : [ "Salaire" ], collection: ["Cadres"] }}));
 //creation des variables du shell
 loadPredicats(db);
 //ajout des documents 
-db.Cadres.insert({nom:"luis", Adresse:"Paris", Age: 31, Salaire : _Elevé});
-db.Cadres.insert({nom:"Antonio", Adresse:"Paris", Age: _Mûr, Salaire : 100});
+db.Cadres.insert({nom:"luis", Adresse:"Paris", Age: 31, Salaire : _Eleve});
+db.Cadres.insert({nom:"Antonio", Adresse:"Paris", Age: _Mur, Salaire : 100});
 db.Cadres.insert({nom:"Jean", Adresse:"Angers", Age: _Jeune, Salaire : 90});
 db.Cadres.insert({nom:"Francis", Adresse:"Angers", Age: _Vieux, Salaire : _Faible});
 db.Cadres.insert({nom:"Julia", Adresse:"Paris", Age: _Jeune, Salaire : _MoyenSup});
